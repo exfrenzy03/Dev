@@ -24,7 +24,6 @@ int main()
 
         point += getPoint(sands);
         updateSands(sands);
-        cout << point << endl;
         BeginDrawing();
         ClearBackground(GRAY);
         DrawText(TextFormat("%d", point), 20, 20, 30, PURPLE);
