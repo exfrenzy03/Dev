@@ -15,7 +15,7 @@ class sand
 public:
     int x_coordinate;
     int y_coordinate;
-    bool cleanable = 0;
+    Color color;
     
     sand(int x, int y)
     {
