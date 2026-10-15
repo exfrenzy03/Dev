@@ -40,26 +40,26 @@ public:
                 y_coordinate += pixel;
                 grid[col][row + 1] = 1;
             }
-            // else
-            // {
-            //     if (grid[col + 1][row + 1] == 0)
-            //     {
-            //         grid[col][row] = 0;
-            //         x_coordinate += pixel;
-            //         y_coordinate += pixel;
-            //         grid[col + 1][row + 1] = 1;
-            //     }
-            //     else
-            //     {
-            //         if (grid[col - 1][row + 1] == 0)
-            //         {
-            //             grid[col][row] = 0;
-            //             x_coordinate -= pixel;
-            //             y_coordinate += pixel;
-            //             grid[col - 1][row + 1] = 1;
-            //         }
-            //     }
-            // }
+            else
+            {
+                if (grid[col + 1][row + 1] == 0)
+                {
+                    grid[col][row] = 0;
+                    x_coordinate += pixel;
+                    y_coordinate += pixel;
+                    grid[col + 1][row + 1] = 1;
+                }
+                else
+                {
+                    if (grid[col - 1][row + 1] == 0)
+                    {
+                        grid[col][row] = 0;
+                        x_coordinate -= pixel;
+                        y_coordinate += pixel;
+                        grid[col - 1][row + 1] = 1;
+                    }
+                }
+            }
         }
     }
 };
