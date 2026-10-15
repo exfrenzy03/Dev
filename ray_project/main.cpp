@@ -1,6 +1,7 @@
 #include <iostream>
 #include "raylib.h"
 #include <vector>
+#include <time.h>
 
 #pragma comment(lib, "raylib.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -18,49 +19,51 @@ using namespace std;
 int main()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dusen Kum Simulasyonu");
-    SetTargetFPS(60); 
+    SetTargetFPS(15);
     vector<sand> sands;
     int point = 0;
-    
+    float fallTimer = 0.0;
+    float fallSpeed = 0.5;
     while (!WindowShouldClose())
     {
         point += getPoint(sands);
         updateSands(sands);
+        if (fallTimer >= fallSpeed)
+        {
+            fallTimer = 0.0;
+        }
+        else
+        {
+            fallTimer += GetFrameTime();
+        }
         BeginDrawing();
         ClearBackground(GRAY);
         DrawText(TextFormat("%d", point), 20, 20, 30, PURPLE);
-        
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             int mx = GetMouseX();
             int my = GetMouseY();
             int col = mx / pixel;
             int row = my / pixel;
-            
+            int randomShape = GetRandomValue(0, 6);
+
             if (col >= 0 && col < COL && row >= 0 && row < ROW)
             {
                 if (grid[col][row] == 0)
                 {
-                    sands.push_back(sand(mx, my));
-                    grid[col][row] = 1;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int calculatedX = mx + blocks[randomShape].position[i].x * pixel;
+                        int calculatedY = my + blocks[randomShape].position[i].y * pixel;
+                        int calculatedCol = calculatedX / pixel;
+                        int calculatedRow = calculatedY / pixel;
+                        sands.push_back(sand(calculatedX, calculatedY, blocks[randomShape].blockColor));
+                        grid[calculatedCol][calculatedRow] = 1;
+                    }
                 }
             }
         }
-        
-        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-        {
-            int mx = GetMouseX();
-            int my = GetMouseY();
-            int col = mx / pixel;
-            int row = my / pixel;
-            
-            if (col >= 0 && col < COL && row >= 0 && row < ROW && grid[col][row] == 0)
-            {
-                sands.push_back(sand(mx, my));
-                grid[col][row] = 1;
-            }
-        }
-        
+
         drawSands(sands);
         EndDrawing();
     }
