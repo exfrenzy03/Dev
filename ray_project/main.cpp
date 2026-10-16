@@ -24,42 +24,21 @@ int main()
     vector<sand> activeBlock;
     int point = 0;
     float fallTimer = 0.0f;
-    float fallSpeed = 0.02f;
+    float fallSpeed = 0.10f;
     while (!WindowShouldClose())
     {
         point += getPoint(sands);
         fallTimer += GetFrameTime();
         if (fallTimer >= fallSpeed)
         {
+            activeBlockFall(activeBlock);
             updateSands(sands);
             fallTimer = 0.0f;
         }
         BeginDrawing();
         ClearBackground(GRAY);
         DrawText(TextFormat("%d", point), 20, 20, 30, PURPLE);
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-        {
-            int mx = GetMouseX();
-            int my = GetMouseY();
-            int col = mx / pixel;
-            int row = my / pixel;
-            int randomShape = GetRandomValue(0, 6);
-
-            if (col >= 0 && col < COL && row >= 0 && row < ROW)
-            {
-                if (grid[col][row] == 0)
-                {
-                    for (int i = 0; i < 4; i++)
-                    {
-                        int calculatedX = mx + blocks[randomShape].position[i].x * pixel;
-                        int calculatedY = my + blocks[randomShape].position[i].y * pixel;
-                        int calculatedCol = calculatedX / pixel;
-                        int calculatedRow = calculatedY / pixel;
-                        activeBlock.push_back(sand(calculatedX, calculatedY, blocks[randomShape].blockColor));
-                    }
-                }
-            }
-        }
+        createBlock(activeBlock);
         updateActiveBlock(activeBlock);
         drawSands(activeBlock);
         drawSands(sands);

@@ -105,6 +105,58 @@ void updateSands(vector<sand> &sands)
     }
 }
 
+void activeBlockFall(vector<sand> &activeBlock)
+{
+    bool canFall = 1;
+    for (int i = 0; i < activeBlock.size(); i++)
+    {
+        int col = activeBlock[i].x_coordinate / pixel;
+        int row = activeBlock[i].y_coordinate / pixel;
+        if (row + 1 < ROW && grid[col][row + 1] != 1)
+        {
+            canFall = 1;
+        }
+        else
+        {
+            canFall = 0;
+            break;
+        }
+    }
+    for (int i = 0; i < activeBlock.size(); i++)
+    {
+        if (canFall)
+        {
+            activeBlock[i].y_coordinate += pixel;
+        }
+    }
+}
+
+void createBlock(vector<sand> &activeBlock)
+{
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        int mx = GetMouseX();
+        int my = GetMouseY();
+        int col = mx / pixel;
+        int row = my / pixel;
+        int randomShape = GetRandomValue(0, 6);
+
+        if (col >= 0 && col < COL && row >= 0 && row < ROW)
+        {
+            if (grid[col][row] == 0)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    int calculatedX = mx + blocks[randomShape].position[i].x * pixel;
+                    int calculatedY = my + blocks[randomShape].position[i].y * pixel;
+                    int calculatedCol = calculatedX / pixel;
+                    int calculatedRow = calculatedY / pixel;
+                    activeBlock.push_back(sand(calculatedX, calculatedY, blocks[randomShape].blockColor));
+                }
+            }
+        }
+    }
+}
 void updateActiveBlock(vector<sand> &activeBlock)
 {
     if (IsKeyPressed(KEY_LEFT) == 1)
