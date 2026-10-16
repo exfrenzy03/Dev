@@ -5,7 +5,7 @@ using namespace std;
 
 const int SCREEN_WIDTH = 900;
 const int SCREEN_HEIGHT = 600;
-const int pixel = 25;
+const int pixel = 15;
 const int ROW = SCREEN_HEIGHT / pixel;
 const int COL = SCREEN_WIDTH / pixel;
 bool grid[COL][ROW] = {0};
@@ -19,12 +19,13 @@ struct blockInfo
 };
 vector<blockInfo> blocks = {
     {{{0, 0}, {1, 0}, {2, 0}, {3, 0}}, colorList[rand() % 4]},
-    {{{0, 0}, {0, -1}, {1, 0}, {2, 0}}, colorList[rand() % 4]},
-    {{{0, 0}, {1, 0}, {2, 0}, {2, -1}}, colorList[rand() % 4]},
-    {{{0, 0}, {1, 0}, {0, -1}, {1, -1}}, colorList[rand() % 4]},
-    {{{0, 0}, {1, 0}, {1, -1}, {2, -1}}, colorList[rand() % 4]},
-    {{{0, 0}, {1, 0}, {2, 0}, {1, -1}}, colorList[rand() % 4]},
-    {{{0, 0}, {1, 0}, {0, -1}, {-1, -1}}, colorList[rand() % 4]}};
+    {{{0, 1}, {0, 0}, {1, 1}, {2, 1}}, colorList[rand() % 4]},
+    {{{0, 1}, {1, 1}, {2, 1}, {2, 0}}, colorList[rand() % 4]},
+    {{{0, 1}, {1, 1}, {0, 0}, {1, 0}}, colorList[rand() % 4]},
+    {{{0, 1}, {1, 1}, {1, 0}, {2, 0}}, colorList[rand() % 4]},
+    {{{0, 1}, {1, 1}, {2, 1}, {1, 0}}, colorList[rand() % 4]},
+    {{{1, 1}, {2, 1}, {1, 0}, {0, 0}}, colorList[rand() % 4]},
+};
 
 class sand
 {
@@ -59,7 +60,7 @@ public:
             }
             else
             {
-                if (grid[col + 1][row + 1] == 0)
+                if (grid[col + 1][row + 1] == 0 && col + 1 < COL)
                 {
                     grid[col][row] = 0;
                     x_coordinate += pixel;
@@ -68,7 +69,7 @@ public:
                 }
                 else
                 {
-                    if (grid[col - 1][row + 1] == 0)
+                    if (grid[col - 1][row + 1] == 0 && col - 1 >= 0)
                     {
                         grid[col][row] = 0;
                         x_coordinate -= pixel;
@@ -96,7 +97,6 @@ void drawSands(const vector<sand> &sands)
         sands[i].draw();
     }
 }
-
 void updateSands(vector<sand> &sands)
 {
     for (int i = 0; i < sands.size(); i++)
@@ -105,6 +105,60 @@ void updateSands(vector<sand> &sands)
     }
 }
 
+void updateActiveBlock(vector<sand> &activeBlock)
+{
+    if (IsKeyPressed(KEY_LEFT) == 1)
+    {
+        bool canMove = 0;
+        for (int i = 0; i < activeBlock.size(); i++)
+        {
+            int col = activeBlock[i].x_coordinate / pixel;
+            int row = activeBlock[i].y_coordinate / pixel;
+            if (col - 1 >= 0 && grid[col - 1][row] != 1)
+            {
+                canMove = 1;
+            }
+            else
+            {
+                canMove = 0;
+                break;
+            }
+        }
+        for (int i = 0; i < activeBlock.size(); i++)
+        {
+            if (canMove)
+            {
+                activeBlock[i].x_coordinate -= pixel;
+            }
+        }
+    }
+
+    if (IsKeyPressed(KEY_RIGHT) == 1)
+    {
+        bool canMove = 0;
+        for (int i = 0; i < activeBlock.size(); i++)
+        {
+            int col = activeBlock[i].x_coordinate / pixel;
+            int row = activeBlock[i].y_coordinate / pixel;
+            if (col + 1 < COL && grid[col + 1][row] != 1)
+            {
+                canMove = 1;
+            }
+            else
+            {
+                canMove = 0;
+                break;
+            }
+        }
+        for (int i = 0; i < activeBlock.size(); i++)
+        {
+            if (canMove)
+            {
+                activeBlock[i].x_coordinate += pixel;
+            }
+        }
+    }
+}
 int getPoint(vector<sand> &sands)
 {
     for (int i = ROW - 1; i >= 0; i--)

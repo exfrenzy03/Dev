@@ -19,22 +19,20 @@ using namespace std;
 int main()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dusen Kum Simulasyonu");
-    SetTargetFPS(15);
+    SetTargetFPS(120);
     vector<sand> sands;
+    vector<sand> activeBlock;
     int point = 0;
-    float fallTimer = 0.0;
-    float fallSpeed = 0.5;
+    float fallTimer = 0.0f;
+    float fallSpeed = 0.02f;
     while (!WindowShouldClose())
     {
         point += getPoint(sands);
-        updateSands(sands);
+        fallTimer += GetFrameTime();
         if (fallTimer >= fallSpeed)
         {
-            fallTimer = 0.0;
-        }
-        else
-        {
-            fallTimer += GetFrameTime();
+            updateSands(sands);
+            fallTimer = 0.0f;
         }
         BeginDrawing();
         ClearBackground(GRAY);
@@ -57,13 +55,13 @@ int main()
                         int calculatedY = my + blocks[randomShape].position[i].y * pixel;
                         int calculatedCol = calculatedX / pixel;
                         int calculatedRow = calculatedY / pixel;
-                        sands.push_back(sand(calculatedX, calculatedY, blocks[randomShape].blockColor));
-                        grid[calculatedCol][calculatedRow] = 1;
+                        activeBlock.push_back(sand(calculatedX, calculatedY, blocks[randomShape].blockColor));
                     }
                 }
             }
         }
-
+        updateActiveBlock(activeBlock);
+        drawSands(activeBlock);
         drawSands(sands);
         EndDrawing();
     }
