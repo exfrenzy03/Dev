@@ -1,5 +1,7 @@
 #include <iostream>
 #include "raylib.h"
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 #include <vector>
 #include <time.h>
 #include <queue>
@@ -25,14 +27,14 @@ int main()
     vector<sand> activeBlock;
     int point = 0;
     float fallTimer = 0.0f;
-    float fallSpeed = 0.02f;
+    float fallSpeed = 0.04f;
     while (!WindowShouldClose())
     {
         point += getPoint(sands);
         fallTimer += GetFrameTime();
         if (fallTimer >= fallSpeed)
         {
-            activeBlockFall(activeBlock,sands);
+            activeBlockFall(activeBlock, sands);
             updateSands(sands);
             fallTimer = 0.0f;
         }
