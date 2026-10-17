@@ -2,6 +2,8 @@
 #include "raylib.h"
 #include <vector>
 #include <time.h>
+#include <queue>
+#include "sandOperator.h"
 
 #pragma comment(lib, "raylib.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -13,7 +15,6 @@
 #pragma comment(lib, "vcruntime.lib")
 #pragma comment(lib, "msvcrt.lib")
 
-#include "sandOperator.h"
 using namespace std;
 
 int main()
@@ -24,7 +25,7 @@ int main()
     vector<sand> activeBlock;
     int point = 0;
     float fallTimer = 0.0f;
-    float fallSpeed = 0.10f;
+    float fallSpeed = 0.02f;
     while (!WindowShouldClose())
     {
         point += getPoint(sands);

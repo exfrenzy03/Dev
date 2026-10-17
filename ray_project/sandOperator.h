@@ -1,11 +1,12 @@
 #include <iostream>
 #include "raylib.h"
 #include <vector>
+#include <queue>
 using namespace std;
 
 const int SCREEN_WIDTH = 1500;
 const int SCREEN_HEIGHT = 900;
-const int pixel = 50;
+const int pixel = 10;
 const int ROW = SCREEN_HEIGHT / pixel;
 const int COL = SCREEN_WIDTH / pixel;
 int grid[COL][ROW] = {0};
@@ -118,7 +119,7 @@ void activeBlockFall(vector<sand> &activeBlock, vector<sand> &sands)
     {
         int col = activeBlock[i].x_coordinate / pixel;
         int row = activeBlock[i].y_coordinate / pixel;
-        if (row + 1 < ROW && grid[col][row + 1] == 0)   
+        if (row + 1 < ROW && grid[col][row + 1] == 0)
         {
             canFall = 1;
         }
@@ -158,18 +159,30 @@ void createBlock(vector<sand> &activeBlock)
             int row = my / pixel;
             int randomShape = GetRandomValue(0, 6);
             int randomColor = GetRandomValue(0, 3);
+            int thickness = 5;
 
             if (col >= 0 && col < COL && row >= 0 && row < ROW)
             {
-                if (grid[col][row] == 0)
+                for (int i = 0; i < 4; i++)
                 {
-                    for (int i = 0; i < 4; i++)
+                    int baseX = mx + (blocks[randomShape].position[i].x * pixel * thickness);
+                    int baseY = my + (blocks[randomShape].position[i].y * pixel * thickness);
+                    for (int dx = 0; dx < thickness; dx++)
                     {
-                        int calculatedX = mx + blocks[randomShape].position[i].x * pixel;
-                        int calculatedY = my + blocks[randomShape].position[i].y * pixel;
-                        int calculatedCol = calculatedX / pixel;
-                        int calculatedRow = calculatedY / pixel;
-                        activeBlock.push_back(sand(calculatedX, calculatedY, colorList[randomColor], randomColor + 1));
+                        for (int dy = 0; dy < thickness; dy++)
+                        {
+                            int calculatedX = baseX + (dx * pixel);
+                            int calculatedY = baseY + (dy * pixel);
+                            int calculatedCol = calculatedX / pixel;
+                            int calculatedRow = calculatedY / pixel;
+                            if (calculatedCol >= 0 && calculatedCol < COL && calculatedRow >= 0 && calculatedRow < ROW)
+                            {
+                                if (grid[calculatedCol][calculatedRow] == 0)
+                                {
+                                    activeBlock.push_back(sand(calculatedX, calculatedY, colorList[randomColor], randomColor + 1));
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -233,30 +246,62 @@ void updateActiveBlock(vector<sand> &activeBlock)
 }
 int getPoint(vector<sand> &sands)
 {
-    for (int i = ROW - 1; i >= 0; i--)
+    bool visited[COL][ROW] = {0};
+    for (int row = 0; row < ROW; row++)
     {
-        bool rowFullAndSettled = true;
-
-        for (int j = 0; j < COL; j++)
+        if (grid[0][row] != 0 && visited[0][row] == 0)
         {
-            if (grid[j][i] == 0 || (i + 1 < ROW && grid[j][i + 1] == 0))
+            int targetColor = grid[0][row];
+            bool bridgeConnected = false;
+            queue<pair<int, int>> toVisit;
+            vector<pair<int, int>> sandToRemove;
+            toVisit.push(make_pair(0, row));
+            visited[0][row] = 1;
+            while (!toVisit.empty())
             {
-                rowFullAndSettled = false;
-                break;
-            }
-        }
-
-        if (rowFullAndSettled)
-        {
-            for (int k = sands.size() - 1; k >= 0; k--)
-            {
-                if (sands[k].y_coordinate / pixel == i)
+                int x = toVisit.front().first;
+                int y = toVisit.front().second;
+                toVisit.pop();
+                sandToRemove.push_back(make_pair(x, y));
+                if (x == COL - 1)
                 {
-                    sands.erase(sands.begin() + k);
+                    bridgeConnected = true;
+                }
+                int directionX[] = {1, -1, 0, 0};
+                int directionY[] = {0, 0, 1, -1};
+                for (int i = 0; i < 4; i++)
+                {
+                    int nx = x + directionX[i];
+                    int ny = y + directionY[i];
+                    if (nx >= 0 && nx < COL && ny >= 0 && ny < ROW)
+                    {
+                        if (grid[nx][ny] == targetColor && visited[nx][ny] == 0)
+                        {
+                            visited[nx][ny] = 1;
+                            toVisit.push(make_pair(nx, ny));
+                        }
+                    }
                 }
             }
-            clearRow(i);
-            return 10;
+            if (bridgeConnected)
+            {
+                bool removeMap[COL][ROW] = {0};
+                for (int i = 0; i < sandToRemove.size(); i++)
+                {
+                    removeMap[sandToRemove[i].first][sandToRemove[i].second] = 1;
+                    grid[sandToRemove[i].first][sandToRemove[i].second] = 0;
+                }
+                for (int k = sands.size() - 1; k >= 0; k--)
+                {
+                    int col = sands[k].x_coordinate / pixel;
+                    int row = sands[k].y_coordinate / pixel;
+                    if (removeMap[col][row] == 1)
+                    {
+                        sands.erase(sands.begin() + k);
+                    }
+                }
+                return 100;
+            }
         }
     }
     return 0;
