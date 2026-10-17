@@ -4,14 +4,21 @@
 #include <queue>
 using namespace std;
 
+// Bütün ekran boyutları ve şekil büyüklüğü
 const int SCREEN_WIDTH = 1500;
 const int SCREEN_HEIGHT = 900;
 const int pixel = 10;
+
+// UI ekran boyutları
+const int UI_WIDTH = 400;
 const int ROW = SCREEN_HEIGHT / pixel;
-const int COL = SCREEN_WIDTH / pixel;
+const int COL = (SCREEN_WIDTH - UI_WIDTH) / pixel;
+
+// Oyun bitirme çizgisi
+const int DEATH_LINE_ROW = 15;
+
 int grid[COL][ROW] = {0};
 vector<Color> colorList = {RED, YELLOW, GREEN, BLUE};
-// srand(time(NULL));
 
 struct blockInfo
 {
@@ -46,7 +53,7 @@ public:
 
     void draw() const
     {
-        DrawRectangle(x_coordinate, y_coordinate, pixel, pixel, color);
+        DrawRectangle(x_coordinate + UI_WIDTH, y_coordinate, pixel, pixel, color);
     }
 
     void update()
@@ -153,7 +160,7 @@ void createBlock(vector<sand> &activeBlock)
     {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            int mx = GetMouseX();
+            int mx = GetMouseX() - UI_WIDTH;
             int my = GetMouseY();
             int col = mx / pixel;
             int row = my / pixel;
@@ -161,7 +168,7 @@ void createBlock(vector<sand> &activeBlock)
             int randomColor = GetRandomValue(0, 3);
             int thickness = 5;
 
-            if (col >= 0 && col < COL && row >= 0 && row < ROW)
+            if (col >= 0 && col < COL && row >= 0 && row <= DEATH_LINE_ROW)
             {
                 for (int i = 0; i < 4; i++)
                 {
