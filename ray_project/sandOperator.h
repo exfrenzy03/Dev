@@ -18,13 +18,13 @@ struct blockInfo
     Color blockColor;
 };
 vector<blockInfo> blocks = {
-    {{{0, 0}, {1, 0}, {2, 0}, {3, 0}}, colorList[rand() % 4]},
-    {{{0, 1}, {0, 0}, {1, 1}, {2, 1}}, colorList[rand() % 4]},
-    {{{0, 1}, {1, 1}, {2, 1}, {2, 0}}, colorList[rand() % 4]},
-    {{{0, 1}, {1, 1}, {0, 0}, {1, 0}}, colorList[rand() % 4]},
-    {{{0, 1}, {1, 1}, {1, 0}, {2, 0}}, colorList[rand() % 4]},
-    {{{0, 1}, {1, 1}, {2, 1}, {1, 0}}, colorList[rand() % 4]},
-    {{{1, 1}, {2, 1}, {1, 0}, {0, 0}}, colorList[rand() % 4]},
+    {{{0, 0}, {1, 0}, {2, 0}, {3, 0}}, colorList[1]},
+    {{{0, 1}, {0, 0}, {1, 1}, {2, 1}}, colorList[1]},
+    {{{0, 1}, {1, 1}, {2, 1}, {2, 0}}, colorList[1]},
+    {{{0, 1}, {1, 1}, {0, 0}, {1, 0}}, colorList[1]},
+    {{{0, 1}, {1, 1}, {1, 0}, {2, 0}}, colorList[1]},
+    {{{0, 1}, {1, 1}, {2, 1}, {1, 0}}, colorList[1]},
+    {{{1, 1}, {2, 1}, {1, 0}, {0, 0}}, colorList[1]},
 };
 
 class sand
@@ -33,12 +33,14 @@ public:
     int x_coordinate;
     int y_coordinate;
     Color color;
+    int colorID;
 
-    sand(int x, int y, Color c)
+    sand(int x, int y, Color c, int id)
     {
         x_coordinate = (x / pixel) * pixel;
         y_coordinate = (y / pixel) * pixel;
         color = c;
+        colorID = id;
     }
 
     void draw() const
@@ -56,7 +58,7 @@ public:
             {
                 grid[col][row] = 0;
                 y_coordinate += pixel;
-                grid[col][row + 1] = 1;
+                grid[col][row + 1] = colorID;
             }
             else
             {
@@ -65,7 +67,7 @@ public:
                     grid[col][row] = 0;
                     x_coordinate += pixel;
                     y_coordinate += pixel;
-                    grid[col + 1][row + 1] = 1;
+                    grid[col + 1][row + 1] = colorID;
                 }
                 else
                 {
@@ -74,7 +76,7 @@ public:
                         grid[col][row] = 0;
                         x_coordinate -= pixel;
                         y_coordinate += pixel;
-                        grid[col - 1][row + 1] = 1;
+                        grid[col - 1][row + 1] = colorID;
                     }
                 }
             }
@@ -116,7 +118,7 @@ void activeBlockFall(vector<sand> &activeBlock, vector<sand> &sands)
     {
         int col = activeBlock[i].x_coordinate / pixel;
         int row = activeBlock[i].y_coordinate / pixel;
-        if (row + 1 < ROW && grid[col][row + 1] != 1)
+        if (row + 1 < ROW && grid[col][row + 1] == 0)   
         {
             canFall = 1;
         }
@@ -138,7 +140,7 @@ void activeBlockFall(vector<sand> &activeBlock, vector<sand> &sands)
         for (int i = 0; i < activeBlock.size(); i++)
         {
             sands.push_back(activeBlock[i]);
-            grid[activeBlock[i].x_coordinate / pixel][activeBlock[i].y_coordinate / pixel] = 1;
+            grid[activeBlock[i].x_coordinate / pixel][activeBlock[i].y_coordinate / pixel] = activeBlock[i].colorID;
         }
         activeBlock.clear();
     }
@@ -155,6 +157,7 @@ void createBlock(vector<sand> &activeBlock)
             int col = mx / pixel;
             int row = my / pixel;
             int randomShape = GetRandomValue(0, 6);
+            int randomColor = GetRandomValue(0, 3);
 
             if (col >= 0 && col < COL && row >= 0 && row < ROW)
             {
@@ -166,13 +169,14 @@ void createBlock(vector<sand> &activeBlock)
                         int calculatedY = my + blocks[randomShape].position[i].y * pixel;
                         int calculatedCol = calculatedX / pixel;
                         int calculatedRow = calculatedY / pixel;
-                        activeBlock.push_back(sand(calculatedX, calculatedY, blocks[randomShape].blockColor));
+                        activeBlock.push_back(sand(calculatedX, calculatedY, colorList[randomColor], randomColor + 1));
                     }
                 }
             }
         }
     }
 }
+
 void updateActiveBlock(vector<sand> &activeBlock)
 {
     if (IsKeyDown(KEY_LEFT) == 1)
@@ -182,7 +186,7 @@ void updateActiveBlock(vector<sand> &activeBlock)
         {
             int col = activeBlock[i].x_coordinate / pixel;
             int row = activeBlock[i].y_coordinate / pixel;
-            if (col - 1 >= 0 && grid[col - 1][row] != 1)
+            if (col - 1 >= 0 && grid[col - 1][row] == 0)
             {
                 canMove = 1;
             }
@@ -208,7 +212,7 @@ void updateActiveBlock(vector<sand> &activeBlock)
         {
             int col = activeBlock[i].x_coordinate / pixel;
             int row = activeBlock[i].y_coordinate / pixel;
-            if (col + 1 < COL && grid[col + 1][row] != 1)
+            if (col + 1 < COL && grid[col + 1][row] == 0)
             {
                 canMove = 1;
             }
