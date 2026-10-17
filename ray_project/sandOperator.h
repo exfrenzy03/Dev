@@ -20,11 +20,21 @@ const int DEATH_LINE_ROW = 15;
 int grid[COL][ROW] = {0};
 vector<Color> colorList = {RED, YELLOW, GREEN, BLUE};
 
+struct GameBlock
+{
+    int shapeIndex;
+    int colorIndex;
+};
+
+GameBlock currentBlock = {-1, -1};
+GameBlock nextBlock = {-1, -1};
+
 struct blockInfo
 {
     Vector2 position[4];
     Color blockColor;
 };
+
 vector<blockInfo> blocks = {
     {{{0, 0}, {1, 0}, {2, 0}, {3, 0}}, colorList[1]},
     {{{0, 1}, {0, 0}, {1, 1}, {2, 1}}, colorList[1]},
@@ -107,6 +117,7 @@ void drawSands(const vector<sand> &sands)
         sands[i].draw();
     }
 }
+
 void updateSands(vector<sand> &sands)
 {
     for (int i = 0; i < sands.size(); i++)
@@ -154,8 +165,22 @@ void activeBlockFall(vector<sand> &activeBlock, vector<sand> &sands)
     }
 }
 
+void initBlocks()
+{
+    if (currentBlock.shapeIndex == -1)
+    {
+        currentBlock.shapeIndex = GetRandomValue(0, 6);
+        currentBlock.colorIndex = GetRandomValue(0, 3);
+
+        nextBlock.shapeIndex = GetRandomValue(0, 6);
+        nextBlock.colorIndex = GetRandomValue(0, 3);
+    }
+}
+
 void createBlock(vector<sand> &activeBlock)
 {
+    initBlocks();
+
     if (activeBlock.size() == 0)
     {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -164,33 +189,37 @@ void createBlock(vector<sand> &activeBlock)
             int my = GetMouseY();
             int col = mx / pixel;
             int row = my / pixel;
-            int randomShape = GetRandomValue(0, 6);
-            int randomColor = GetRandomValue(0, 3);
             int thickness = 5;
 
             if (col >= 0 && col < COL && row >= 0 && row <= DEATH_LINE_ROW)
             {
-                for (int i = 0; i < 4; i++)
+                if (grid[col][row] == 0)
                 {
-                    int baseX = mx + (blocks[randomShape].position[i].x * pixel * thickness);
-                    int baseY = my + (blocks[randomShape].position[i].y * pixel * thickness);
-                    for (int dx = 0; dx < thickness; dx++)
+                    for (int i = 0; i < 4; i++)
                     {
-                        for (int dy = 0; dy < thickness; dy++)
+                        int baseX = mx + (blocks[currentBlock.shapeIndex].position[i].x * pixel * thickness);
+                        int baseY = my + (blocks[currentBlock.shapeIndex].position[i].y * pixel * thickness);
+                        for (int dx = 0; dx < thickness; dx++)
                         {
-                            int calculatedX = baseX + (dx * pixel);
-                            int calculatedY = baseY + (dy * pixel);
-                            int calculatedCol = calculatedX / pixel;
-                            int calculatedRow = calculatedY / pixel;
-                            if (calculatedCol >= 0 && calculatedCol < COL && calculatedRow >= 0 && calculatedRow < ROW)
+                            for (int dy = 0; dy < thickness; dy++)
                             {
-                                if (grid[calculatedCol][calculatedRow] == 0)
+                                int calculatedX = baseX + (dx * pixel);
+                                int calculatedY = baseY + (dy * pixel);
+                                int calculatedCol = calculatedX / pixel;
+                                int calculatedRow = calculatedY / pixel;
+                                if (calculatedCol >= 0 && calculatedCol < COL && calculatedRow >= 0 && calculatedRow < ROW)
                                 {
-                                    activeBlock.push_back(sand(calculatedX, calculatedY, colorList[randomColor], randomColor + 1));
+                                    if (grid[calculatedCol][calculatedRow] == 0)
+                                    {
+                                        activeBlock.push_back(sand(calculatedX, calculatedY, colorList[currentBlock.colorIndex], currentBlock.colorIndex + 1));
+                                    }
                                 }
                             }
                         }
                     }
+                    currentBlock = nextBlock;
+                    nextBlock.shapeIndex = GetRandomValue(0, 6);
+                    nextBlock.colorIndex = GetRandomValue(0, 3);
                 }
             }
         }
@@ -251,6 +280,24 @@ void updateActiveBlock(vector<sand> &activeBlock)
         }
     }
 }
+
+void showNextBlock(GameBlock nextBlock)
+{
+    int previewCenterX = 130;
+    int previewCenterY = 250;
+    int blockSize = 50;
+    if (nextBlock.shapeIndex != -1)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            int px = previewCenterX + (blocks[nextBlock.shapeIndex].position[i].x * blockSize);
+            int py = previewCenterY + (blocks[nextBlock.shapeIndex].position[i].y * blockSize);
+            DrawRectangle(px, py, blockSize, blockSize, colorList[nextBlock.colorIndex]);
+            DrawRectangleLines(px, py, blockSize, blockSize, BLACK);
+        }
+    }
+}
+
 int getPoint(vector<sand> &sands)
 {
     bool visited[COL][ROW] = {0};
@@ -262,8 +309,10 @@ int getPoint(vector<sand> &sands)
             bool bridgeConnected = false;
             queue<pair<int, int>> toVisit;
             vector<pair<int, int>> sandToRemove;
+
             toVisit.push(make_pair(0, row));
             visited[0][row] = 1;
+
             while (!toVisit.empty())
             {
                 int x = toVisit.front().first;

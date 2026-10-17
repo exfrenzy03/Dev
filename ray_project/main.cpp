@@ -29,12 +29,20 @@ int main()
     float fallTimer = 0.0f;
     float fallSpeed = 0.04f;
     bool gameOver = false;
+
+    initBlocks();
+
     while (!WindowShouldClose())
     {
         if (!gameOver)
         {
             point += getPoint(sands);
             fallTimer += GetFrameTime();
+            // Hızlı düşürme mekanizması
+            if (IsKeyDown(KEY_DOWN))
+            {
+                fallTimer += GetFrameTime() * 6.0f; // Süreyi 6 kat hızlandırıyoruz
+            }
             if (fallTimer >= fallSpeed)
             {
                 activeBlockFall(activeBlock, sands);
@@ -53,26 +61,34 @@ int main()
             updateActiveBlock(activeBlock);
         }
         BeginDrawing();
+
         ClearBackground(DARKGRAY);                               // Oyun alanı rengi
         DrawRectangle(0, 0, UI_WIDTH, SCREEN_HEIGHT, LIGHTGRAY); // Sol arayüz bölmesi
+
         // Puan kutusu
         DrawRectangle(10, 10, UI_WIDTH - 20, 100, GRAY);
         DrawRectangleLinesEx({10, 10, (float)UI_WIDTH - 20, 100}, 5.0f, BLACK);
         DrawText(TextFormat("PUAN: %d", point), 30, 40, 40, BLACK);
+
         // Sıradaki Blok Kutusu
         DrawRectangle(10, 120, UI_WIDTH - 20, 300, GRAY);
         DrawRectangleLinesEx({10, 120, (float)UI_WIDTH - 20, 300}, 5.0f, BLACK);
         DrawText("SIRADAKI BLOK", 80, 150, 30, BLACK);
+        showNextBlock(currentBlock);
+
         // Skor Tablosu Kutusu
         DrawRectangle(10, 430, UI_WIDTH - 20, SCREEN_HEIGHT - 440, GRAY);
         DrawRectangleLinesEx({10, 430, (float)UI_WIDTH - 20, (float)SCREEN_HEIGHT - 440}, 5.0f, BLACK);
         DrawText("SKOR TABLOSU", 85, 460, 30, BLACK);
+
         // Ölüm çizgisi
         DrawLineEx({(float)UI_WIDTH, (float)DEATH_LINE_ROW * pixel}, {(float)SCREEN_WIDTH, (float)DEATH_LINE_ROW * pixel}, 5.0f, LIGHTGRAY);
+
         // Kum çizdirme
         drawSands(activeBlock);
         drawSands(sands);
-        // GAME OVER EKRANI
+
+        // Gameover ekranı
         if (gameOver)
         {
             DrawRectangle(UI_WIDTH, 0, SCREEN_WIDTH - UI_WIDTH, SCREEN_HEIGHT, Fade(BLACK, 0.7f));
@@ -89,6 +105,8 @@ int main()
                     for (int r = 0; r < ROW; r++)
                         grid[c][r] = 0;
                 point = 0;
+                currentBlock.shapeIndex = -1;
+                initBlocks();
             }
         }
         EndDrawing();
