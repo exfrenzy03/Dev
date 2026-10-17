@@ -19,7 +19,7 @@ using namespace std;
 int main()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dusen Kum Simulasyonu");
-    SetTargetFPS(120);
+    SetTargetFPS(50);
     vector<sand> sands;
     vector<sand> activeBlock;
     int point = 0;
@@ -31,7 +31,7 @@ int main()
         fallTimer += GetFrameTime();
         if (fallTimer >= fallSpeed)
         {
-            activeBlockFall(activeBlock);
+            activeBlockFall(activeBlock,sands);
             updateSands(sands);
             fallTimer = 0.0f;
         }
