@@ -18,7 +18,12 @@ const int COL = (SCREEN_WIDTH - UI_WIDTH) / pixel;
 const int DEATH_LINE_ROW = 15;
 
 int grid[COL][ROW] = {0};
-vector<Color> colorList = {RED, YELLOW, GREEN, BLUE};
+vector<Color> colorList = {
+    {255, 0, 128, 255},  // Neon Pembe
+    {0, 255, 255, 255},  // Cyber Mavi (Cyan)
+    {57, 255, 20, 255},  // Toksik Yeşil
+    {255, 255, 0, 255}   // Elektrik Sarı
+};
 
 struct GameBlock
 {
@@ -283,9 +288,9 @@ void updateActiveBlock(vector<sand> &activeBlock)
 
 void showNextBlock(GameBlock nextBlock)
 {
-    int previewCenterX = 130;
-    int previewCenterY = 250;
-    int blockSize = 50;
+    int previewCenterX = 120;
+    int previewCenterY = 220;
+    int blockSize = 30;
     if (nextBlock.shapeIndex != -1)
     {
         for (int i = 0; i < 4; i++)
